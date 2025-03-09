@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <style>
+  /* Style pour la table */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #dddddd;
+}
+
+/* Style pour les cellules de la table */
+th, td {
+  border: 1px solid #dddddd;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Style pour l'en-tête de la table */
+th {
+  background-color: #f2f2f2;
+}
+
+/* Style pour le bouton */
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Style pour le textarea */
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Style pour les titres */
+h1, h2 {
+  color: #333;
+}
+
+/* Style pour le conteneur */
+#container {
+  margin-top: 20px;
+}
+  </style>
+<head>
+  <meta charset="UTF-8">
+  <title>Envoyer du texte à une API et afficher la réponse</title>
+</head>
+<body>
+  <h1>Envoyer du texte à une API</h1>
+  <textarea id="textToSend" rows="20" cols="150"></textarea><br><br>
+  <button onclick="envoyerTexteAPI()">Envoyer</button><br><br>
+
+  <h2>Réponse de l'API</h2>
+  <div id="responseTable"></div>
+
+<table border="1">
+    <thead>
+      <tr id="keysRow"></tr>
+    </thead>
+    <tbody>
+      <tr id="valuesRows"></tr>
+    </tbody>
+</table>
+<div id="container"></div>
+  <script>
+
+function afficherReponse(data) {
+
+  const container = document.getElementById('container');
+
+// Créer un tableau HTML
+const table = document.createElement('table');
+table.classList.add('styled-table');
+// Créer la première ligne du tableau avec les clés
+const keys = Object.keys(data[0]);
+const headerRow = document.createElement('tr');
+
+keys.forEach(key => {
+  const th = document.createElement('th');
+  th.textContent = key;
+  headerRow.appendChild(th);
+});
+
+// Ajouter la première ligne au tableau
+table.appendChild(headerRow);
+
+// Ajouter les données au tableau
+for (let key in data) {
+  if (data.hasOwnProperty(key)) {
+    const item = data[key];
+    const row = document.createElement('tr');
+
+    keys.forEach(key => {
+      const cell = document.createElement('td');
+      cell.textContent = item[key];
+      row.appendChild(cell);
+    });
+
+    // Ajouter la ligne au tableau
+    table.appendChild(row);
+  }
+}
+
+container.innerHTML = '';
+
+// Ajouter le tableau au conteneur HTML
+container.appendChild(table);
+
+
+
+}
+
+
+
+    function envoyerTexteAPI() {
+      const texte = document.getElementById('textToSend').value;
+      const data = { text: texte };
+
+      fetch('http://127.0.0.1:8000/api/transform', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Échec de la requête');
+      })
+      .then(data => {
+        console.log('Données reçues de l\'API :', data);
+        afficherReponse(data);
+      })
+      .catch(error => {
+        console.error('Erreur :', error);
+        // Gérer les erreurs d'envoi
+      });
+    }
+  </script>
+</body>
+</html>
